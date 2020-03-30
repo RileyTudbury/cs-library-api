@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using library_api.DB;
 using library_api.Models;
+using library_api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace library_api.Controllers
@@ -10,12 +11,20 @@ namespace library_api.Controllers
   [Route("api/[controller]")]
   public class BooksController : ControllerBase
   {
+    private readonly BooksService _bs;
+
+    public BooksController(BooksService bs)
+    {
+      _bs = bs;
+    }
+
+
     [HttpGet]
     public ActionResult<IEnumerable<Book>> Get()
     {
       try
       {
-        return Ok(FakeDB.books);
+        return Ok(_bs.Get());
       }
       catch (Exception e)
       {
@@ -24,16 +33,11 @@ namespace library_api.Controllers
     }
 
     [HttpGet("{bookId}")]
-    public ActionResult<Book> Get(string bookId)
+    public ActionResult<Book> Get(int bookId)
     {
       try
       {
-        Book foundBook = FakeDB.books.Find(b => b.Id == bookId);
-        if (foundBook == null)
-        {
-          throw new Exception("Invalid ID");
-        }
-        return Ok(foundBook);
+        return Ok(_bs.Get(bookId));
       }
       catch (Exception e)
       {
@@ -46,8 +50,7 @@ namespace library_api.Controllers
     {
       try
       {
-        FakeDB.books.Add(newBook);
-        return Created($"api/book/{newBook.Id}", newBook);
+        return Ok(_bs.Create(newBook));
       }
       catch (Exception e)
       {
@@ -55,20 +58,13 @@ namespace library_api.Controllers
       }
     }
 
-    [HttpPut]
-    public ActionResult<Book> Edit(string id, [FromBody] Book editedBook)
+    [HttpPut("{id}")]
+    public ActionResult<Book> Edit(int id, [FromBody] Book editedBook)
     {
       try
       {
-        Book bookToEdit = FakeDB.books.Find(b => b.Id == id);
-        if (bookToEdit == null)
-        {
-          throw new Exception();
-        }
-        bookToEdit.Title = editedBook.Title;
-        bookToEdit.Author = editedBook.Author;
-        bookToEdit.PageCount = editedBook.PageCount;
-        return Ok(bookToEdit);
+        editedBook.Id = id;
+        return Ok(_bs.Edit(editedBook));
       }
       catch (Exception e)
       {
@@ -77,17 +73,11 @@ namespace library_api.Controllers
     }
 
     [HttpDelete("{id}")]
-    public ActionResult<string> Delete(string id)
+    public ActionResult<string> Delete(int id)
     {
       try
       {
-        Book bookToDelete = FakeDB.books.Find(b => b.Id == id);
-        if (bookToDelete == null)
-        {
-          throw new Exception("Invalid Id");
-        }
-        FakeDB.books.Remove(bookToDelete);
-        return Ok("Successfully Removed");
+        return Ok(_bs.Delete(id));
       }
       catch (Exception e)
       {

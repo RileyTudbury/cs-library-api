@@ -13,12 +13,11 @@ namespace library_api.Models
     public string Author { get; set; }
 
     public int PageCount { get; set; }
-    public string Id { get; set; }
+    public int Id { get; set; }
 
 
     public Book()
     {
-      Id = Guid.NewGuid().ToString();
     }
 
     public Book(string title, string author, int pageCount)
@@ -26,7 +25,6 @@ namespace library_api.Models
       Title = title;
       Author = author;
       PageCount = pageCount;
-      Id = Guid.NewGuid().ToString();
 
 
     }
