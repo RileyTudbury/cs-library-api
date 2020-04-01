@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using library_api.Repositories;
 using library_api.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -34,6 +35,29 @@ namespace library_api
 
       services.AddTransient<BooksService>();
       services.AddTransient<BooksRepository>();
+      services.AddAuthentication(options =>
+            {
+              options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+              options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+              options.Authority = $"https://{Configuration["Auth0:Domain"]}/";
+              options.Audience = Configuration["Auth0:Audience"];
+            });
+      services.AddCors(options =>
+      {
+        options.AddPolicy("CorsDevPolicy", builder =>
+              {
+                builder
+                          .WithOrigins(new string[]{
+                         "http://localhost:8080", "http://localhost:8081"
+                      })
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials();
+              });
+      });
+
 
     }
 
@@ -54,6 +78,8 @@ namespace library_api
       app.UseHttpsRedirection();
 
       app.UseRouting();
+
+      app.UseAuthentication();
 
       app.UseAuthorization();
 

@@ -19,19 +19,19 @@ namespace library_api.Repositories
       return _db.Query<Book>(sql);
     }
 
-    public Book Get(int Id)
+    public Book Get(int id)
     {
-      string sql = "SELECT * books WHERE id = @Id";
-      return _db.QueryFirstOrDefault<Book>(sql, new { Id });
+      string sql = "SELECT * FROM books WHERE id = @Id";
+      return _db.QueryFirstOrDefault<Book>(sql, new { id });
     }
 
     public Book Create(Book newBook)
     {
       string sql = @"
       INSERT INTO books
-      (title, author, pageCount)
+      (title, author, pageCount, creatorId)
       VALUES
-      (@Title, @Author, @PageCount);
+      (@Title, @Author, @PageCount, @CreatorId);
       SELECT LAST_INSERT_ID();
       ";
       int id = _db.ExecuteScalar<int>(sql, newBook);
@@ -47,7 +47,7 @@ namespace library_api.Repositories
           title = @Title,
           author = @Author,
           pageCount = @PageCount
-      WHERE id = @Id;
+      WHERE id = @Id
       ";
       _db.Execute(sql, updatedBook);
       return updatedBook;

@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using library_api.DB;
+using System.Security.Claims;
 using library_api.Models;
 using library_api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace library_api.Controllers
@@ -46,10 +47,13 @@ namespace library_api.Controllers
     }
 
     [HttpPost]
+    [Authorize]
     public ActionResult<Book> Create([FromBody] Book newBook)
     {
       try
       {
+        string userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+        newBook.CreatorId = userId;
         return Ok(_bs.Create(newBook));
       }
       catch (Exception e)
